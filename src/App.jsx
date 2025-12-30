@@ -31,8 +31,9 @@ export default function App() {
   }, [data]);
 
   return (
-    <div className="min-h-screen bg-[#070A12] text-white">
-      <div className="mx-auto max-w-5xl px-4 py-10 space-y-6">
+    <div className="min-h-screen w-full bg-[#070A12] text-white">
+      <div className="w-full px-4 py-10 space-y-6">
+        <div className="w-full">
         <header className="space-y-2">
           <h1 className="text-3xl font-bold">LuckPool Dashboard</h1>
           <p className="text-white/60 text-sm">Verus miner stats · auto-refresh 15s</p>
@@ -76,23 +77,31 @@ export default function App() {
           </div>
         ) : null}
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card label="Status" value={String(kpis.status)} />
-          <Card label="Hashrate" value={String(kpis.hashrate)} />
-          <Card label="Workers" value={String(kpis.workers)} />
-          <Card label="Balance" value={String(kpis.balance)} />
-          <Card label="Paid" value={String(kpis.paid)} />
-          <Card label="Shares" value={String(kpis.shares)} />
-        </div>
-
-        <div className="text-xs text-white/40">
-          {loading ? "Updating…" : data ? "Live" : "Enter wallet and hit Load"}
-        </div>
-
-        <pre className="rounded-xl border border-white/10 bg-black/40 p-4 text-xs overflow-auto text-white/70">
-          {data ? JSON.stringify(data, null, 2) : "No data yet."}
-        </pre>
-      </div>
+<div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+  {/* Left column */}
+  <div className="space-y-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+      <Card label="Status" value={String(kpis.status)} />
+      <Card label="Hashrate" value={String(kpis.hashrate)} />
+      <Card label="Workers" value={String(kpis.workers)} />
+      <Card label="Balance" value={String(kpis.balance)} />
+      <Card label="Paid" value={String(kpis.paid)} />
+      <Card label="Shares" value={String(kpis.shares)} />
     </div>
+  </div>
+
+  {/* Right column */}
+  <div className="space-y-4">
+    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+      <div className="text-xs uppercase tracking-wide text-white/60 mb-2">Raw data</div>
+      <pre className="rounded-xl border border-white/10 bg-black/40 p-4 text-xs overflow-auto text-white/70 h-[420px]">
+        {data ? JSON.stringify(data, null, 2) : "No data yet."}
+      </pre>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
   );
 }
