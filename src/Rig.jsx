@@ -223,9 +223,11 @@ useEffect(() => {
           }
           tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
         />
-        <YAxis
-          tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
-        />
+       <YAxis
+            domain={["dataMin - 50", "dataMax + 50"]}
+            tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
+            />
+
         <Tooltip
           labelFormatter={(v) =>
             new Date(v).toLocaleTimeString([], {
