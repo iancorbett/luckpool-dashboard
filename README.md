@@ -8,6 +8,8 @@ Live, free, and open-source.
 
 ---
 
+<img width="1801" height="922" alt="Screenshot 2025-12-31 at 11 37 27 AM" src="https://github.com/user-attachments/assets/087d6b36-0f6a-4e01-b1d7-8bd813e92e9f" />
+
 ##  Features
 
 -  **Auto-refresh every 15s**
