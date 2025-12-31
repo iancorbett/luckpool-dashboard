@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { loadWallet } from "./lib/storage";
 import { useMinerStats } from "./hooks/useMinerStats";
+import { Link } from "react-router-dom";
 import {
   LineChart,
   Line,
@@ -159,8 +160,14 @@ useEffect(() => {
         <div className="mx-auto w-full max-w-6xl space-y-4">
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
+          <Link
+            to="/"
+            className="rounded-lg border border-white/15 px-3 py-1.5 text-sm font-semibold text-white/80 hover:bg-white/10"
+        >
+            ← Dashboard
+        </Link>
             <div>
-              <div className="text-2xl sm:text-3xl font-extrabold">Rig Mode</div>
+              <div className="text-2xl sm:text-3xl font-extrabold">Graph Mode</div>
               <div className="text-sm text-white/60">
                 LuckPool · Verus · auto-refresh 15s
                 {derived.last ? ` · updated ${derived.last}` : ""}

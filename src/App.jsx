@@ -93,7 +93,7 @@ export default function App() {
   to="/rig"
   className="rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
 >
-  🖥️ Rig Mode
+  🖥️ Graph Mode
 </Link>
     </div>
   </div>
