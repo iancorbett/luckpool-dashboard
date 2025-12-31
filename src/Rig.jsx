@@ -11,7 +11,6 @@ import {
 } from "recharts";
 
 
-
 function Pill({ ok, children }) {
   return (
     <span
@@ -43,6 +42,17 @@ export default function Rig() {
   const { data, err, loading } = useMinerStats(wallet);
 
   const [series, setSeries] = useState([]);
+
+  const stats = useMemo(() => {
+    if (series.length === 0) return null;
+    const vals = series.map(p => p.hr);
+    return {
+      min: Math.min(...vals),
+      max: Math.max(...vals),
+      avg: vals.reduce((a,b)=>a+b,0)/vals.length,
+    };
+  }, [series]);
+  
 
   const chartWrapRef = useRef(null);
 const [chartW, setChartW] = useState(0);
@@ -257,6 +267,13 @@ useEffect(() => {
     )}
   </div>
 </div>
+
+{stats && (
+  <div className="mt-2 text-xs text-white/60">
+    Min {stats.min.toFixed(0)} KH · Avg {stats.avg.toFixed(0)} KH · Max {stats.max.toFixed(0)} KH
+  </div>
+)}
+
 
         </div>
       </div>
