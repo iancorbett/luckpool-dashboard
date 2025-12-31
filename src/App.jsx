@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { loadWallet, saveWallet } from "./lib/storage";
 import { useMinerStats } from "./hooks/useMinerStats";
+import { Link } from "react-router-dom";
+
 
 function Card({ label, value }) {
   return (
@@ -87,8 +89,16 @@ export default function App() {
       <Card label="Balance" value={String(kpis.balance)} />
       <Card label="Paid" value={String(kpis.paid)} />
       <Card label="Shares" value={String(kpis.shares)} />
+      <Link
+  to="/rig"
+  className="rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+>
+  🖥️ Rig Mode
+</Link>
     </div>
   </div>
+
+  
 
   {/* Right column */}
   <div className="space-y-4">
@@ -103,5 +113,7 @@ export default function App() {
 </div>
 </div>
 </div>
+
+
   );
 }
