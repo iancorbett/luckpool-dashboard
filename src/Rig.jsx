@@ -162,7 +162,7 @@ useEffect(() => {
           <div className="flex items-start justify-between gap-3">
           <Link
             to="/"
-            className="rounded-lg border border-white/15 px-3 py-1.5 text-sm font-semibold text-white/80 hover:bg-white/10"
+            className="rounded-lg min-h-[36px] border border-white/15 px-4 py-1.5 text-sm font-semibold text-white/80 hover:bg-white/10"
         >
             ← Dashboard
         </Link>
