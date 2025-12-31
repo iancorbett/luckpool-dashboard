@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { loadWallet } from "./lib/storage";
 import { useMinerStats } from "./hooks/useMinerStats";
 import {
@@ -9,6 +9,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+
+
 
 function Pill({ ok, children }) {
   return (
@@ -41,6 +43,24 @@ export default function Rig() {
   const { data, err, loading } = useMinerStats(wallet);
 
   const [series, setSeries] = useState([]);
+
+  const chartWrapRef = useRef(null);
+const [chartW, setChartW] = useState(0);
+
+useEffect(() => {
+  const el = chartWrapRef.current;
+  if (!el) return;
+
+  const ro = new ResizeObserver(() => {
+    setChartW(el.getBoundingClientRect().width);
+  });
+
+  ro.observe(el);
+  setChartW(el.getBoundingClientRect().width);
+
+  return () => ro.disconnect();
+}, []);
+
 
   // Keep a rolling chart in memory (client-side)
   useEffect(() => {
@@ -182,56 +202,52 @@ export default function Rig() {
 
           {/* Chart */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center justify-between">
-              <div className="text-xs uppercase tracking-wide text-white/60">
-                Hashrate (last ~30 min)
-              </div>
-              <div className="text-xs text-white/50">points: {series.length}</div>
-            </div>
+  <div className="flex items-center justify-between">
+    <div className="text-xs uppercase tracking-wide text-white/60">
+      Hashrate (last ~30 min)
+    </div>
+    <div className="text-xs text-white/50">points: {series.length}</div>
+  </div>
 
-            <div className="mt-4 h-[220px]">
-              {series.length < 2 ? (
-                <div className="text-sm text-white/50">Collecting data…</div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={series}>
-                    <XAxis
-                      dataKey="t"
-                      tickFormatter={(v) =>
-                        new Date(v).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      }
-                      stroke="currentColor"
-                      tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
-                    />
-                    <YAxis
-                      tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
-                      stroke="currentColor"
-                    />
-                    <Tooltip
-                      labelFormatter={(v) =>
-                        new Date(v).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })
-                      }
-                      formatter={(value) => [value, "hashrateSol"]}
-                      contentStyle={{
-                        background: "rgba(0,0,0,0.85)",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        borderRadius: 12,
-                        color: "white",
-                      }}
-                    />
-                    <Line type="monotone" dataKey="hr" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </div>
+  <div ref={chartWrapRef} className="mt-4 w-full">
+    {series.length < 2 ? (
+      <div className="text-sm text-white/50">Collecting data…</div>
+    ) : chartW < 10 ? (
+      <div className="text-sm text-white/50">Sizing chart…</div>
+    ) : (
+      <LineChart width={Math.floor(chartW)} height={220} data={series}>
+        <XAxis
+          dataKey="t"
+          tickFormatter={(v) =>
+            new Date(v).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          }
+          tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
+        />
+        <YAxis
+          tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
+        />
+        <Tooltip
+          labelFormatter={(v) =>
+            new Date(v).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })
+          }
+          formatter={(value) => [`${Number(value).toFixed(2)} KH`, "Hashrate"]}
+          contentStyle={{
+            background: "rgba(0,0,0,0.85)",
+            border: "1px solid rgba(255,255,255,0.15)",
+            borderRadius: 12,
+            color: "white",
+          }}
+        />
+        <Line type="monotone" dataKey="hr" strokeWidth={2} dot={false} />
+      </LineChart>
+    )}
+  </div>
+</div>
+
         </div>
       </div>
     </div>
