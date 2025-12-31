@@ -1,6 +1,15 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { loadWallet } from "./lib/storage";
 import { useMinerStats } from "./hooks/useMinerStats";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
 
 function Pill({ ok, children }) {
   return (
@@ -32,6 +41,30 @@ export default function Rig() {
   // Rig mode = auto uses saved wallet (no input)
   const wallet = loadWallet();
   const { data, err, loading } = useMinerStats(wallet);
+
+  const [series, setSeries] = useState([]);
+
+// Keep a rolling chart in memory (client-side)
+useEffect(() => {
+  const sol = data?.hashrateSol;
+  const ts = data?.timestamp;
+
+  if (typeof sol !== "number" || typeof ts !== "number") return;
+
+  setSeries((prev) => {
+    const next = [
+      ...prev,
+      {
+        t: ts * 1000,
+        hr: sol, // raw sol value
+      },
+    ];
+
+    // keep last 120 points (~30 mins if refresh is 15s)
+    return next.slice(-120);
+  });
+}, [data?.hashrateSol, data?.timestamp]);
+
 
   const derived = useMemo(() => {
     const workers = Array.isArray(data?.workers) ? data.workers : [];
