@@ -44,16 +44,62 @@ export default function Rig() {
 
   // Keep a rolling chart in memory (client-side)
   useEffect(() => {
-    const sol = data?.hashrateSol;
-    const ts = data?.timestamp;
-
-    if (typeof sol !== "number" || typeof ts !== "number") return;
-
+    // Prefer numeric fields if they exist
+    const raw =
+      data?.hashrateSolS ?? data?.hashrateSol ?? null;
+  
+    let kh = NaN;
+  
+    if (typeof raw === "number" && Number.isFinite(raw)) {
+      // If this is actually Sol/s, we can't assume KH. Skip conversion.
+      // We'll fall back to parsing the string below.
+      kh = NaN;
+    }
+  
+    // Parse hashrateString like: "938.25 KH" or "1.09 MH"
+    if (!Number.isFinite(kh)) {
+      const s = typeof data?.hashrateString === "string" ? data.hashrateString : "";
+      const m = s.match(/([\d.]+)\s*(H|KH|MH|GH)/i);
+      if (!m) return;
+  
+      const val = Number(m[1]);
+      const unit = m[2].toUpperCase();
+  
+      if (!Number.isFinite(val)) return;
+  
+      const mult =
+        unit === "H" ? 1 / 1000 :
+        unit === "KH" ? 1 :
+        unit === "MH" ? 1000 :
+        unit === "GH" ? 1000 * 1000 :
+        1;
+  
+      kh = val * mult; // normalize to KH
+    }
+  
+    const now = Date.now();
+  
     setSeries((prev) => {
-      const next = [...prev, { t: ts * 1000, hr: sol }];
-      return next.slice(-120); // ~30 mins at 15s refresh
+      const last = prev[prev.length - 1];
+      if (last && now - last.t < 1000) return prev;
+  
+      const next = [...prev, { t: now, hr: kh }];
+      return next.slice(-120);
     });
-  }, [data?.hashrateSol, data?.timestamp]);
+  }, [data]);
+  
+
+  useEffect(() => {
+    if (!data) return;
+    console.log("tick", new Date().toLocaleTimeString(), {
+      hashrateSolS: data.hashrateSolS,
+      hashrateSol: data.hashrateSol,
+      hashrateString: data.hashrateString,
+      timestamp: data.timestamp,
+    });
+  }, [data]);
+  
+  
 
   const derived = useMemo(() => {
     const workers = Array.isArray(data?.workers) ? data.workers : [];
