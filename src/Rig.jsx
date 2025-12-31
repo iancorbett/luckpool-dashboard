@@ -10,7 +10,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-
 function Pill({ ok, children }) {
   return (
     <span
@@ -38,49 +37,43 @@ function BigStat({ label, value }) {
 }
 
 export default function Rig() {
-  // Rig mode = auto uses saved wallet (no input)
   const wallet = loadWallet();
   const { data, err, loading } = useMinerStats(wallet);
 
   const [series, setSeries] = useState([]);
 
-// Keep a rolling chart in memory (client-side)
-useEffect(() => {
-  const sol = data?.hashrateSol;
-  const ts = data?.timestamp;
+  // Keep a rolling chart in memory (client-side)
+  useEffect(() => {
+    const sol = data?.hashrateSol;
+    const ts = data?.timestamp;
 
-  if (typeof sol !== "number" || typeof ts !== "number") return;
+    if (typeof sol !== "number" || typeof ts !== "number") return;
 
-  setSeries((prev) => {
-    const next = [
-      ...prev,
-      {
-        t: ts * 1000,
-        hr: sol, // raw sol value
-      },
-    ];
-
-    // keep last 120 points (~30 mins if refresh is 15s)
-    return next.slice(-120);
-  });
-}, [data?.hashrateSol, data?.timestamp]);
-
+    setSeries((prev) => {
+      const next = [...prev, { t: ts * 1000, hr: sol }];
+      return next.slice(-120); // ~30 mins at 15s refresh
+    });
+  }, [data?.hashrateSol, data?.timestamp]);
 
   const derived = useMemo(() => {
     const workers = Array.isArray(data?.workers) ? data.workers : [];
     const workerCount = workers.length;
-
-    // LuckPool worker string includes ":on:" when online
     const isOnline = workers.some((w) => String(w).includes(":on:"));
 
     return {
       workerCount,
       isOnline,
       hashrate: data?.hashrateString ?? "—",
-      balance: typeof data?.balance === "number" ? data.balance.toFixed(8) : data?.balance ?? "—",
-      paid: typeof data?.paid === "number" ? data.paid.toFixed(8) : data?.paid ?? "—",
+      balance:
+        typeof data?.balance === "number"
+          ? data.balance.toFixed(8)
+          : data?.balance ?? "—",
+      paid:
+        typeof data?.paid === "number" ? data.paid.toFixed(8) : data?.paid ?? "—",
       shares: data?.shares ?? "—",
-      last: data?.timestamp ? new Date(data.timestamp * 1000).toLocaleTimeString() : null,
+      last: data?.timestamp
+        ? new Date(data.timestamp * 1000).toLocaleTimeString()
+        : null,
     };
   }, [data]);
 
@@ -102,9 +95,7 @@ useEffect(() => {
               <Pill ok={derived.isOnline}>
                 {derived.isOnline ? "🟢 Online" : "🔴 Offline"}
               </Pill>
-              <div className="text-xs text-white/50">
-                {loading ? "Updating…" : ""}
-              </div>
+              <div className="text-xs text-white/50">{loading ? "Updating…" : ""}</div>
             </div>
           </div>
 
@@ -113,7 +104,8 @@ useEffect(() => {
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <div className="text-lg font-semibold">No wallet saved</div>
               <div className="text-white/60 text-sm mt-1">
-                Go to the main dashboard, paste your wallet, hit Load once — then come back to <code>/rig</code>.
+                Go to the main dashboard, paste your wallet, hit Load once — then
+                come back to <code>/rig</code>.
               </div>
             </div>
           ) : null}
@@ -133,8 +125,65 @@ useEffect(() => {
             <BigStat label="Paid" value={String(derived.paid)} />
             <BigStat label="Shares" value={String(derived.shares)} />
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <div className="text-xs uppercase tracking-wide text-white/60">Wallet</div>
-              <div className="mt-2 font-mono text-sm text-white/80 break-all">{wallet}</div>
+              <div className="text-xs uppercase tracking-wide text-white/60">
+                Wallet
+              </div>
+              <div className="mt-2 font-mono text-sm text-white/80 break-all">
+                {wallet}
+              </div>
+            </div>
+          </div>
+
+          {/* Chart */}
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div className="flex items-center justify-between">
+              <div className="text-xs uppercase tracking-wide text-white/60">
+                Hashrate (last ~30 min)
+              </div>
+              <div className="text-xs text-white/50">points: {series.length}</div>
+            </div>
+
+            <div className="mt-4 h-[220px]">
+              {series.length < 2 ? (
+                <div className="text-sm text-white/50">Collecting data…</div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={series}>
+                    <XAxis
+                      dataKey="t"
+                      tickFormatter={(v) =>
+                        new Date(v).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      }
+                      stroke="currentColor"
+                      tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
+                    />
+                    <YAxis
+                      tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }}
+                      stroke="currentColor"
+                    />
+                    <Tooltip
+                      labelFormatter={(v) =>
+                        new Date(v).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        })
+                      }
+                      formatter={(value) => [value, "hashrateSol"]}
+                      contentStyle={{
+                        background: "rgba(0,0,0,0.85)",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        borderRadius: 12,
+                        color: "white",
+                      }}
+                    />
+                    <Line type="monotone" dataKey="hr" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>
