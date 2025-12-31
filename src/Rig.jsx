@@ -242,7 +242,15 @@ useEffect(() => {
             color: "white",
           }}
         />
-        <Line type="monotone" dataKey="hr" strokeWidth={2} dot={false} />
+        <Line
+            type="monotone"
+            dataKey="hr"
+            stroke="#38bdf8"
+            strokeWidth={2}
+            dot={false}
+            filter="drop-shadow(0 0 6px rgba(56,189,248,0.6))"
+            />
+
       </LineChart>
     )}
   </div>
